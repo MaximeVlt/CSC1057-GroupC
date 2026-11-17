@@ -1,0 +1,50 @@
+.header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #0b2d6b;
+    color:#ffffff;
+    padding: 16px 24px;
+}
+
+.header-left,
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.header-logo {
+    font-size: 24px;
+}
+
+.header-title{
+    font-size: 22px;
+    font-weight: 700;
+}
+
+.header-role{
+    background: #b7d9ff;
+    color: #0b2d6b;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 2px 12px;
+    border-radius: 999px;
+}
+
+.header-greeting{
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.header-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #b7d9ff;
+    color:#0b2d6b;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}

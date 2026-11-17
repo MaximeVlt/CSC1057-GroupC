@@ -1,0 +1,26 @@
+.sidebar{
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    width: 220px;
+    min-height: calc(100vh - 68px);
+    background: #f0f0f5;
+    padding: 16px 12px;
+}
+
+.sidebar-link {
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: #111111;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.sidebar-link:hover {
+    background: #e0e4ee;
+}
+
+.sidebar-link.active {
+    background: #b7d9ff;
+    color: #0b2d6b;
+}
