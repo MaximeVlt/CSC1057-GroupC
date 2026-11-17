@@ -1,0 +1,53 @@
+.announcements-list{
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.announcement-card {
+    border: 1px solid #bbbbbb;
+    border-radius: 8px;
+    background: #f4f4f4;
+    padding: 14px 18px;
+}
+
+.announcement-card.unread {
+    background: #d6e8fb;
+    border-color: #4a90e2;
+}
+
+.announcement-title {
+    margin: 0 0 6px;
+}
+
+.announcement-message {
+    margin: 0 0 6px;
+}
+
+.announcement-source {
+    margin: 0;
+    color: #777777;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.announcements-filters {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.filter-pill {
+    padding: 6px 16px;
+    border: 1px solid #888888;
+    border-radius: 8px;
+    background: #ffffff;
+    cursor: pointer;
+    font-size: 15px;
+}
+
+.filter-pill.active {
+    background: #b7d9ff;
+    border-color: #4a90e2;
+    color: #0b2d6b;
+}
