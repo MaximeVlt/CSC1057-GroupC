@@ -1,0 +1,134 @@
+.timetable-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.timetable-title {
+  margin-bottom: 0;
+}
+
+.timetable-subtitle {
+  margin: 4px 0 0;
+  color: #777777;
+  font-weight: 600;
+}
+
+.timetable-controls {
+  display: flex;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+.timetable-grid {
+  display: grid;
+  grid-template-columns: 60px repeat(5, 1fr);
+  grid-auto-rows: 56px;
+  column-gap: 6px;
+}
+
+.timetable-day {
+  align-self: end;
+  padding-bottom: 6px;
+  text-align: center;
+  font-weight: 700;
+}
+
+.timetable-time {
+  grid-column: 1;
+  font-size: 14px;
+  font-weight: 600;
+  transform: translateY(-9px);
+}
+
+.timetable-cell {
+  border-top: 1px solid #d0d0d0;
+}
+
+.timetable-block {
+  display: flex;
+  flex-direction: column;
+  margin: 3px 0;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+
+.colour-purple { background: #ddd6fb; color: #3c3489; }
+.colour-blue { background: #cde6fa; color: #0c447c; }
+.colour-pink { background: #f2c6f0; color: #6b1f66; }
+.colour-green { background: #c4ecc9; color: #27500a; }
+.colour-orange { background: #fae0bd; color: #633806; }
+
+
+.timetable-daylist {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.timetable-dayitem {
+  display: grid;
+  grid-template-columns: 120px 1fr 120px;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 10px;
+}
+
+.timetable-daytime {
+  font-weight: 700;
+}
+
+.timetable-empty {
+  color: #777777;
+}
+
+
+.timetable-bottom {
+  display: flex;
+  gap: 32px;
+  margin-top: 24px;
+}
+
+.timetable-legend {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.timetable-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.timetable-legend-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+}
+
+.timetable-keydates {
+  flex: 1;
+  border: 1px solid #bbbbbb;
+  border-radius: 12px;
+  background: #f4f4f4;
+  padding: 14px 18px;
+}
+
+.timetable-keydates h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.timetable-keydate {
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+  font-size: 14px;
+}
