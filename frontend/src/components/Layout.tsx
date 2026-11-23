@@ -11,6 +11,8 @@ const studentLinks: SidebarLink[] = [
     { label: 'Attendance', path: '/attendance'},
     { label: 'Events', path: '/events'},
     { label: 'Announcements', path: '/announcements'},
+    // Staff only: hide for students once Cognito roles are wired in (KAN-26)
+    { label: 'Create post', path: '/create-post'},
 ]
 function Layout() {
     return (

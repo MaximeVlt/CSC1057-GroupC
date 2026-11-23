@@ -51,3 +51,12 @@
     border-color: #4a90e2;
     color: #0b2d6b;
 }
+.announcement-card {
+    cursor: pointer;
+}
+
+.announcements-notice {
+    margin: 0 0 16px;
+    color: #777777;
+    font-size: 14px;
+}

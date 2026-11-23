@@ -1,37 +1,51 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { fetchAnnouncements, type Announcement } from '../../api/announcements'
+import { announcements as sampleAnnouncements } from '../../data/announcements'
 import './Announcements.css'
-const announcements = [
-    {
-        id: 1,
-        title: 'Exam timetable released',
-        message: 'The semester 1 exam timetable is now available.',
-        source: 'Registry',
-        read: false,
-    },
 
-    {
-        id: 2,
-        title: 'CSC1057 lecture moved to QG25',
-        message: 'This Thursday the lecture will be in QG25 instead of QG27.',
-        source: 'CSC1057',
-        read: false,
-    },
+const READ_KEY = 'smart-campus-read-announcements'
 
-    {
-        id: 3,
-        title: 'Library hours extended',
-        message: 'The library will be open till midnight during exams.',
-        source: 'Library',
-        read: true,
-    },
-]
+function loadReadIds(): Set<string> {
+    try {
+        const saved = localStorage.getItem(READ_KEY)
+        if (saved) return new Set(JSON.parse(saved) as string[])
+    } catch {
+        // storage unavailable, fall back to sample data flags
+    }
+    return new Set(sampleAnnouncements.filter((a) => a.read).map((a) => String(a.id)))
+}
+
 function Announcements() {
     const [filter, setFilter] = useState('all')
+    const [items, setItems] = useState<Announcement[]>([])
+    const [loading, setLoading] = useState(true)
+    const [live, setLive] = useState(false)
+    const [readIds, setReadIds] = useState<Set<string>>(loadReadIds)
 
-    const visible = announcements.filter((item) =>{
-        if (filter ==='unread') return !item.read
+    useEffect(() => {
+        fetchAnnouncements().then((result) => {
+            setItems(result.items)
+            setLive(result.live)
+            setLoading(false)
+        })
+    }, [])
+
+    function markRead(id: string) {
+        if (readIds.has(id)) return
+        const next = new Set(readIds).add(id)
+        setReadIds(next)
+        try {
+            localStorage.setItem(READ_KEY, JSON.stringify([...next]))
+        } catch {
+            // ignore storage errors
+        }
+    }
+
+    const visible = items.filter((item) => {
+        if (filter === 'unread') return !readIds.has(item.id)
         return true
     })
+
     return (
         <div>
             <h1>Announcements</h1>
@@ -46,19 +60,31 @@ function Announcements() {
                 className={filter === 'unread' ? 'filter-pill active': 'filter-pill'}
                 onClick={() => setFilter('unread')}
             >
-            Unread 
+            Unread
             </button>
             </div>
-            
+
+            {!loading && !live && (
+                <p className="announcements-notice">Showing sample announcements (live service unavailable).</p>
+            )}
+
             <div className="announcements-list">
+              {loading && <p className="announcements-notice">Loading announcements…</p>}
+              {!loading && visible.length === 0 && (
+                <p className="announcements-notice">No announcements to show.</p>
+              )}
               {visible.map((item) => (
-                <div 
-                key={item.id} 
-                className={item.read ? 'announcement-card': 'announcement-card unread'}
+                <div
+                key={item.id}
+                className={readIds.has(item.id) ? 'announcement-card': 'announcement-card unread'}
+                onClick={() => markRead(item.id)}
                 >
                     <h3 className = "announcement-title"> {item.title}</h3>
                     <p className = "announcement-message">{item.message}</p>
-                    <p className = "announcement-source">{item.source}</p>
+                    <p className = "announcement-source">
+                        {item.source}
+                        {item.createdAt && ` · ${new Date(item.createdAt).toLocaleDateString('en-IE', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' })}`}
+                    </p>
                 </div>
                 ))}
                </div>
