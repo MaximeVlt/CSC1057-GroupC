@@ -107,6 +107,7 @@ function RoomSearch() {
   const [roomType, setRoomType] = useState('Any')
   const [day, setDay] = useState<ClassSession['day']>('Mon')
   const [time, setTime] = useState('12:00')
+  const [searchMessage, setSearchMessage] = useState('')
 
   const availableRooms = useMemo(() => {
     const selectedStart = toMinutes(time)
@@ -259,9 +260,9 @@ function RoomSearch() {
         <div className="room-filter-actions">
           <button
             className="room-search-button"
-            onClick={() => {
-              // Results update automatically when filters change.
-            }}
+            onClick={() =>
+              setSearchMessage(`Showing available rooms for ${day} at ${time}.`)
+            }
           >
             Search
           </button>
@@ -329,6 +330,9 @@ function RoomSearch() {
             Clear filters
           </button>
         </div>
+      )}
+      {searchMessage && (
+        <p className="room-search-note">{searchMessage}</p>
       )}
 
     </div>
