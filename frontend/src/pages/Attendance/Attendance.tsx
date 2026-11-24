@@ -11,14 +11,14 @@ const moduleAttendance: ModuleAttendance[] = [
   {
     code: 'CSC1202',
     name: 'Programming',
-    attended: 18,
-    missed: 2,
+    attended: 20,
+    missed: 0,
   },
   {
     code: 'CSC1041',
     name: 'Quantitative Analysis',
-    attended: 17,
-    missed: 3,
+    attended: 20,
+    missed: 0,
   },
   {
     code: 'CSC1058',
@@ -29,16 +29,17 @@ const moduleAttendance: ModuleAttendance[] = [
   {
     code: 'CSC1201',
     name: 'LLM Engineering',
-    attended: 18,
-    missed: 2,
+    attended: 14,
+    missed: 6,
   },
   {
     code: 'CSC1057',
     name: 'IT Architecture',
-    attended: 17,
-    missed: 3,
+    attended: 16,
+    missed: 4,
   },
 ]
+
 
 function Attendance() {
   const totalAttended = moduleAttendance.reduce(
