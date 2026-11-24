@@ -1,3 +1,4 @@
+import { useAuth } from 'react-oidc-context'
 import './Header.css'
 
 type HeaderProps = {
@@ -5,8 +6,20 @@ type HeaderProps = {
     roleLabel?: string
 }
 
-function Header({userName, roleLabel}: HeaderProps){
+function Header({ userName, roleLabel }: HeaderProps) {
+    const auth = useAuth()
     const initial = userName.charAt(0).toUpperCase()
+
+    async function signOut() {
+        await auth.removeUser()
+
+        const url = 'https://eu-north-1zncytdwpn.auth.eu-north-1.amazoncognito.com/logout'
+        const clientId = '67djennimsfi9rlp74era766jf'
+        const returnUrl = window.location.origin + '/'
+
+        window.location.href =
+            `${url}?client_id=${clientId}&logout_uri=${encodeURIComponent(returnUrl)}`
+    }
 
     return (
         <header className="header">
@@ -19,8 +32,10 @@ function Header({userName, roleLabel}: HeaderProps){
             <div className="header-right">
                 <span className="header-greeting">Hi, {userName}</span>
                 <div className="header-avatar">{initial}</div>
+                <button onClick={signOut}>Sign Out</button>
             </div>
         </header>
     )
 }
+
 export default Header
