@@ -3,6 +3,7 @@
 //
 //   GET  /announcements  -> list all announcements, newest first
 //   POST /announcements  -> create a new announcement (staff "Create post" page)
+//                           needs a Cognito access token from the "staff" group
 
 import { randomUUID } from 'node:crypto'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
@@ -11,6 +12,7 @@ import { DynamoDBDocumentClient, PutCommand, ScanCommand } from '@aws-sdk/lib-dy
 const TABLE_NAME = process.env.TABLE_NAME
 const db = DynamoDBDocumentClient.from(new DynamoDBClient({}))
 
+const STAFF_GROUP = 'staff'
 const LIMITS = { title: 120, message: 2000, source: 60 }
 
 function reply(statusCode, body) {
@@ -19,6 +21,14 @@ function reply(statusCode, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   }
+}
+
+// API Gateway has already verified the token (JWT authorizer). It passes
+// cognito:groups as a string such as "[staff]" or "[staff admin]".
+function isStaff(event) {
+  const groups = event.requestContext?.authorizer?.jwt?.claims?.['cognito:groups'] ?? ''
+  const list = Array.isArray(groups) ? groups : String(groups).replace(/^\[|\]$/g, '').split(/[\s,]+/)
+  return list.includes(STAFF_GROUP)
 }
 
 async function listAnnouncements() {
@@ -69,7 +79,10 @@ export async function handler(event) {
   const method = event.requestContext?.http?.method
   try {
     if (method === 'GET') return await listAnnouncements()
-    if (method === 'POST') return await createAnnouncement(event.body)
+    if (method === 'POST') {
+      if (!isStaff(event)) return reply(403, { error: 'Only staff can publish announcements' })
+      return await createAnnouncement(event.body)
+    }
     return reply(405, { error: 'Method not allowed' })
   } catch (err) {
     console.error(err)

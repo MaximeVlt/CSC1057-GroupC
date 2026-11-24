@@ -7,6 +7,14 @@ Parameters:
     Type: String
     Default: '*'
     Description: Front-end origin allowed by CORS (e.g. the Amplify URL). '*' while testing.
+  UserPoolId:
+    Type: String
+    Default: eu-north-1_zNcyTdWpn
+    Description: Cognito user pool that signs the login tokens (KAN-26).
+  UserPoolClientId:
+    Type: String
+    Default: 67djennimsfi9rlp74era766jf
+    Description: Cognito app client used by the front end.
 
 Resources:
   AnnouncementsTable:
@@ -31,6 +39,14 @@ Resources:
           - !Ref AllowedOrigin
         AllowMethods: [GET, POST, OPTIONS]
         AllowHeaders: [Content-Type, Authorization]
+      Auth:
+        Authorizers:
+          CognitoAuthorizer:
+            IdentitySource: $request.header.Authorization
+            JwtConfiguration:
+              issuer: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPoolId}'
+              audience:
+                - !Ref UserPoolClientId
 
   AnnouncementsFunction:
     Type: AWS::Serverless::Function
@@ -60,6 +76,8 @@ Resources:
             ApiId: !Ref AnnouncementsApi
             Path: /announcements
             Method: POST
+            Auth:
+              Authorizer: CognitoAuthorizer
 
 Outputs:
   AnnouncementsApiUrl:

@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { useAuth } from 'react-oidc-context'
 import { createAnnouncement, isApiConfigured } from '../../api/announcements'
 import './CreatePost.css'
 
@@ -7,6 +8,7 @@ const TITLE_MAX = 120
 const MESSAGE_MAX = 2000
 
 function CreatePost() {
+    const auth = useAuth()
     const [title, setTitle] = useState('')
     const [message, setMessage] = useState('')
     const [source, setSource] = useState('')
@@ -28,7 +30,7 @@ function CreatePost() {
                 title: title.trim(),
                 message: message.trim(),
                 source: source.trim() || 'Staff',
-            })
+            }, auth.user?.access_token ?? '')
             setPublished(created.title)
             setTitle('')
             setMessage('')

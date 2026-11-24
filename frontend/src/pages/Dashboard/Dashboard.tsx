@@ -1,6 +1,7 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { timetable } from '../../data/timetable'
-import { announcements } from '../../data/announcements'
+import { fetchAnnouncements, loadReadIds, type Announcement } from '../../api/announcements'
 import { events } from '../../data/events'
 import './Dashboard.css'
 
@@ -12,8 +13,18 @@ const overallAttendance = 87
 
 function Dashboard() {
   const todaysClasses = timetable.filter((c) => c.day === today)
-  const unread = announcements.filter((a) => !a.read)
+  const [announcements, setAnnouncements] = useState<Announcement[]>([])
+  const [loading, setLoading] = useState(true)
+  const [readIds] = useState<Set<string>>(loadReadIds)
+  const unread = announcements.filter((a) => !readIds.has(a.id)).slice(0, 3)
   const upcomingEvents = events.slice(0, 2)
+
+  useEffect(() => {
+    fetchAnnouncements().then((result) => {
+      setAnnouncements(result.items)
+      setLoading(false)
+    })
+  }, [])
 
   return (
     <div>
@@ -35,6 +46,8 @@ function Dashboard() {
 
         <section className="dashboard-card">
           <h2>Announcements</h2>
+          {loading && <p className="dashboard-sub">Loading announcements…</p>}
+          {!loading && unread.length === 0 && <p className="dashboard-sub">No unread announcements.</p>}
           {unread.map((a) => (
             <div key={a.id} className="dashboard-row">
               <p className="dashboard-main">
