@@ -7,6 +7,7 @@ import RoomSearch from './pages/RoomSearch/RoomSearch'
 import Attendance from './pages/Attendance/Attendance'
 import Events from './pages/Events/Events'
 import Announcements from './pages/Announcements/Announcements'
+import CreatePost from './pages/CreatePost/CreatePost'
 
 function App() {
   const auth = useAuth()
@@ -32,6 +33,7 @@ function App() {
           <Route path="/attendance" element={student ? <Attendance /> : denied} />
           <Route path="/events" element={student ? <Events /> : denied} />
           <Route path="/announcements" element={student || staff ? <Announcements /> : denied} />
+          <Route path="/create-post" element={staff ? <CreatePost /> : denied} />
           <Route path="/users" element={admin ? <h2>User Management (Not Implemented)</h2> : denied} />
           <Route path="/audit-log" element={admin ? <h2>Audit Log (Not Implemented)</h2> : denied} />
         </Route>

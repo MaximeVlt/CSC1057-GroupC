@@ -16,6 +16,7 @@ const studentLinks: SidebarLink[] = [
 
 const staffLinks: SidebarLink[] = [
     { label: 'Announcements', path: '/announcements' },
+    { label: 'Create post', path: '/create-post' },
 ]
 
 const adminLinks: SidebarLink[] = [
