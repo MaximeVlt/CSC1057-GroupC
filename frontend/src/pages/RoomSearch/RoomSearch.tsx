@@ -1,4 +1,3 @@
-
 import { useMemo, useState } from 'react'
 import { timetable } from '../../data/timetable'
 import type { ClassSession } from '../../data/timetable'
