@@ -9,34 +9,34 @@ type ModuleAttendance = {
 
 const moduleAttendance: ModuleAttendance[] = [
   {
-    code: 'CSC1057',
-    name: 'IT Architecture',
-    attended: 8,
+    code: 'CSC1202',
+    name: 'Programming',
+    attended: 18,
     missed: 2,
   },
   {
     code: 'CSC1041',
-    name: 'Programming',
-    attended: 6,
+    name: 'Quantitative Analysis',
+    attended: 17,
     missed: 3,
   },
   {
-    code: 'CSC1202',
-    name: 'Computer Systems',
-    attended: 9,
-    missed: 1,
-  },
-  {
     code: 'CSC1058',
-    name: 'Web Development',
-    attended: 7,
+    name: 'User Interface Design',
+    attended: 17,
     missed: 3,
   },
   {
     code: 'CSC1201',
-    name: 'Information Systems',
-    attended: 8,
-    missed: 1,
+    name: 'LLM Engineering',
+    attended: 18,
+    missed: 2,
+  },
+  {
+    code: 'CSC1057',
+    name: 'IT Architecture',
+    attended: 17,
+    missed: 3,
   },
 ]
 
@@ -60,6 +60,7 @@ function Attendance() {
   return (
     <div className="attendance-page">
       <h1 className="attendance-title">Attendance</h1>
+
       <p className="attendance-subtitle">
         Track your attendance across your modules
       </p>
@@ -109,6 +110,7 @@ function Attendance() {
       <div className="attendance-module-list">
         {moduleAttendance.map((module) => {
           const sessions = module.attended + module.missed
+
           const percentage = Math.round(
             (module.attended / sessions) * 100
           )
@@ -116,7 +118,10 @@ function Attendance() {
           const belowTarget = percentage < 75
 
           return (
-            <div className="attendance-module-card" key={module.code}>
+            <div
+              className="attendance-module-card"
+              key={module.code}
+            >
               <div className="module-top-row">
                 <div className="module-info">
                   <h3>{module.name}</h3>
@@ -154,9 +159,11 @@ function Attendance() {
                 <span>
                   <strong>{module.attended}</strong> sessions attended
                 </span>
+
                 <span>
                   <strong>{module.missed}</strong> sessions missed
                 </span>
+
                 <span>
                   <strong>{sessions}</strong> total sessions
                 </span>
