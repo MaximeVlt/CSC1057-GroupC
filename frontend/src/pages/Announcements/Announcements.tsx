@@ -1,19 +1,6 @@
 import { useEffect, useState } from 'react'
-import { fetchAnnouncements, type Announcement } from '../../api/announcements'
-import { announcements as sampleAnnouncements } from '../../data/announcements'
+import { fetchAnnouncements, loadReadIds, saveReadIds, type Announcement } from '../../api/announcements'
 import './Announcements.css'
-
-const READ_KEY = 'smart-campus-read-announcements'
-
-function loadReadIds(): Set<string> {
-    try {
-        const saved = localStorage.getItem(READ_KEY)
-        if (saved) return new Set(JSON.parse(saved) as string[])
-    } catch {
-        // storage unavailable, fall back to sample data flags
-    }
-    return new Set(sampleAnnouncements.filter((a) => a.read).map((a) => String(a.id)))
-}
 
 function Announcements() {
     const [filter, setFilter] = useState('all')
@@ -34,11 +21,7 @@ function Announcements() {
         if (readIds.has(id)) return
         const next = new Set(readIds).add(id)
         setReadIds(next)
-        try {
-            localStorage.setItem(READ_KEY, JSON.stringify([...next]))
-        } catch {
-            // ignore storage errors
-        }
+        saveReadIds(next)
     }
 
     const visible = items.filter((item) => {
