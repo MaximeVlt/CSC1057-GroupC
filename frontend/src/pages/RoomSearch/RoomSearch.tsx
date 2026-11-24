@@ -1,10 +1,11 @@
+
 import { useMemo, useState } from 'react'
 import { timetable } from '../../data/timetable'
-import type { ClassSession } from '../../data/timetable'
 import './RoomSearch.css'
 
 type Room = {
   id: string
+  name: string
   building: string
   capacity: number
   type: string
@@ -13,189 +14,206 @@ type Room = {
 
 const rooms: Room[] = [
   {
-    id: 'L114',
-    building: 'Lonsdale Building',
-    capacity: 30,
-    type: 'Lecture room',
-    features: ['30 seats', 'Computer', 'Projector'],
-  },
-  {
-    id: 'LIB-3',
+    id: 'LIBRARY',
+    name: 'Library',
     building: 'Library',
     capacity: 6,
     type: 'Group study',
-    features: ['6 seats', 'Group study', 'Whiteboard'],
-  },
-  {
-    id: 'QG27',
-    building: 'Business School',
-    capacity: 40,
-    type: 'Lecture room',
-    features: ['40 seats', 'Lecture room'],
-  },
-  {
-    id: 'L025',
-    building: 'Lonsdale Building',
-    capacity: 25,
-    type: 'Computer room',
-    features: ['25 seats', 'Computer', 'Projector'],
+    features: ['Group study']
   },
   {
     id: 'L101',
-    building: 'Lonsdale Building',
+    name: 'L101',
+    building: 'McNulty',
     capacity: 30,
-    type: 'Lecture room',
-    features: ['30 seats', 'Projector'],
+    type: 'Computer room',
+    features: ['Computers']
+  },
+  {
+    id: 'L114',
+    name: 'L114',
+    building: 'McNulty',
+    capacity: 30,
+    type: 'Computer room',
+    features: ['Computers']
   },
   {
     id: 'CG86',
-    building: 'Business School',
+    name: 'CG86',
+    building: 'Henry Grattan',
     capacity: 40,
     type: 'Lecture room',
-    features: ['40 seats', 'Lecture room'],
+    features: ['Lecture room']
   },
   {
     id: 'SA101',
-    building: 'Glasnevin',
-    capacity: 25,
-    type: 'Seminar room',
-    features: ['25 seats', 'Seminar room'],
+    name: 'SA101',
+    building: 'Stokes',
+    capacity: 40,
+    type: 'Lecture room',
+    features: ['Lecture room']
   },
   {
     id: 'HG20',
-    building: 'Glasnevin',
-    capacity: 20,
-    type: 'Seminar room',
-    features: ['20 seats', 'Seminar room'],
+    name: 'HG20',
+    building: 'Nursing Building',
+    capacity: 40,
+    type: 'Lecture room',
+    features: ['Lecture room']
   },
   {
     id: 'FTG11',
-    building: 'Glasnevin',
-    capacity: 24,
-    type: 'Computer room',
-    features: ['24 seats', 'Computers'],
+    name: 'FTG11',
+    building: 'Polaris',
+    capacity: 40,
+    type: 'Lecture room',
+    features: ['Lecture room']
+  },
+  {
+    id: 'QG27',
+    name: 'QG27',
+    building: 'Business School',
+    capacity: 40,
+    type: 'Lecture room',
+    features: ['Lecture room']
   },
 ]
 
-const days: ClassSession['day'][] = [
-  'Mon',
-  'Tue',
-  'Wed',
-  'Thu',
-  'Fri',
+const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri'] as const
+
+const buildings = [
+  'Any building',
+  'Library',
+  'McNulty',
+  'Henry Grattan',
+  'Stokes',
+  'Nursing Building',
+  'Polaris',
+  'Business School',
 ]
 
-const times = [
-  '09:00',
-  '10:00',
-  '11:00',
-  '12:00',
-  '13:00',
-  '14:00',
-  '15:00',
-  '16:00',
+const timeOptions = [
+  { value: '12:00', label: '12:00' },
+  { value: '09:00', label: '09:00' },
+  { value: '10:00', label: '10:00' },
+  { value: '14:00', label: '14:00' },
+  { value: '15:00', label: '15:00' },
+  { value: '16:00', label: '16:00' },
 ]
 
-function toMinutes(time: string) {
-  const [hours, minutes] = time.split(':').map(Number)
-  return hours * 60 + minutes
+function minutes(time: string) {
+  const [hours, mins] = time.split(':').map(Number)
+  return hours * 60 + mins
+}
+
+// Checks whether two time periods overlap.
+// A class ending exactly when the search starts is not an overlap.
+function hasTimeOverlap(
+  classStart: string,
+  classEnd: string,
+  searchStart: number,
+  searchEnd: number
+) {
+  return (
+    minutes(classStart) < searchEnd &&
+    minutes(classEnd) > searchStart
+  )
 }
 
 function RoomSearch() {
-  const [building, setBuilding] = useState('All buildings')
+  const [building, setBuilding] = useState('Any building')
   const [capacity, setCapacity] = useState('Any')
   const [roomType, setRoomType] = useState('Any')
-  const [day, setDay] = useState<ClassSession['day']>('Mon')
+  const [day, setDay] = useState<(typeof days)[number]>('Mon')
   const [time, setTime] = useState('12:00')
-  const [searchMessage, setSearchMessage] = useState('')
+  const [searched, setSearched] = useState(true)
 
   const availableRooms = useMemo(() => {
-    const selectedStart = toMinutes(time)
-    const selectedEnd = selectedStart + 60
+    const searchStart = minutes(time)
+    const searchEnd = searchStart + 60
 
     return rooms.filter((room) => {
-      const correctBuilding =
-        building === 'All buildings' || room.building === building
+      const buildingMatches =
+        building === 'Any building' || room.building === building
 
-      const correctCapacity =
+      const capacityMatches =
         capacity === 'Any' || room.capacity >= Number(capacity)
 
-      const correctType =
+      const typeMatches =
         roomType === 'Any' || room.type === roomType
 
-      const isAvailable = !timetable.some((session) => {
+      const hasNoScheduledClass = !timetable.some((session) => {
         if (session.room !== room.id || session.day !== day) {
           return false
         }
 
-        return (
-          toMinutes(session.start) < selectedEnd &&
-          toMinutes(session.end) > selectedStart
+        return hasTimeOverlap(
+          session.start,
+          session.end,
+          searchStart,
+          searchEnd
         )
       })
 
       return (
-        correctBuilding &&
-        correctCapacity &&
-        correctType &&
-        isAvailable
+        buildingMatches &&
+        capacityMatches &&
+        typeMatches &&
+        hasNoScheduledClass
       )
     })
   }, [building, capacity, roomType, day, time])
 
-  function getFreeUntil(roomId: string) {
-    const selectedEnd = toMinutes(time)
+  function nextBooking(roomId: string) {
+    const searchEnd = minutes(time) + 60
 
-    const nextClass = timetable
+    const next = timetable
       .filter(
         (session) =>
           session.room === roomId &&
           session.day === day &&
-          toMinutes(session.start) >= selectedEnd,
+          minutes(session.start) >= searchEnd
       )
       .sort(
-        (a, b) =>
-          toMinutes(a.start) - toMinutes(b.start),
+        (a, b) => minutes(a.start) - minutes(b.start)
       )[0]
 
-    return nextClass
-      ? `Free until ${nextClass.start}`
-      : 'Free all day'
+    return next
+      ? `Next class at ${next.start}`
+      : 'No later class scheduled'
   }
 
   function resetFilters() {
-    setBuilding('All buildings')
+    setBuilding('Any building')
     setCapacity('Any')
     setRoomType('Any')
     setDay('Mon')
     setTime('12:00')
+    setSearched(true)
   }
 
   return (
     <div className="room-search-page">
+      <h1 className="room-search-title">Room search</h1>
+      <p className="room-search-subtitle">
+        Find a free room to study or work in
+      </p>
 
-      <div className="room-search-top">
-        <div>
-          <h1 className="room-search-title">Room search</h1>
-          <p className="room-search-subtitle">
-            Find a free room to study or work in
-          </p>
-        </div>
-      </div>
-
-      <section className="room-search-filters">
-
+      <section
+        className="room-search-panel"
+        aria-label="Room search filters"
+      >
         <label className="room-filter">
           <span>Building</span>
           <select
             value={building}
-            onChange={(e) => setBuilding(e.target.value)}
+            onChange={(event) => setBuilding(event.target.value)}
           >
-            <option>All buildings</option>
-            <option>Lonsdale Building</option>
-            <option>Library</option>
-            <option>Business School</option>
-            <option>Glasnevin</option>
+            {buildings.map((item) => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
           </select>
         </label>
 
@@ -203,7 +221,7 @@ function RoomSearch() {
           <span>Capacity</span>
           <select
             value={capacity}
-            onChange={(e) => setCapacity(e.target.value)}
+            onChange={(event) => setCapacity(event.target.value)}
           >
             <option value="Any">Any capacity</option>
             <option value="4">4+ people</option>
@@ -217,13 +235,12 @@ function RoomSearch() {
           <span>Room type</span>
           <select
             value={roomType}
-            onChange={(e) => setRoomType(e.target.value)}
+            onChange={(event) => setRoomType(event.target.value)}
           >
             <option value="Any">Any</option>
             <option value="Group study">Group study</option>
-            <option value="Lecture room">Lecture room</option>
             <option value="Computer room">Computer room</option>
-            <option value="Seminar room">Seminar room</option>
+            <option value="Lecture room">Lecture room</option>
           </select>
         </label>
 
@@ -231,13 +248,13 @@ function RoomSearch() {
           <span>Day</span>
           <select
             value={day}
-            onChange={(e) =>
-              setDay(e.target.value as ClassSession['day'])
+            onChange={(event) =>
+              setDay(event.target.value as (typeof days)[number])
             }
           >
-            {days.map((d) => (
-              <option key={d} value={d}>
-                {d}
+            {days.map((item) => (
+              <option key={item} value={item}>
+                {item}
               </option>
             ))}
           </select>
@@ -247,11 +264,11 @@ function RoomSearch() {
           <span>When</span>
           <select
             value={time}
-            onChange={(e) => setTime(e.target.value)}
+            onChange={(event) => setTime(event.target.value)}
           >
-            {times.map((t) => (
-              <option key={t} value={t}>
-                {t}
+            {timeOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
               </option>
             ))}
           </select>
@@ -260,13 +277,10 @@ function RoomSearch() {
         <div className="room-filter-actions">
           <button
             className="room-search-button"
-            onClick={() =>
-              setSearchMessage(`Showing available rooms for ${day} at ${time}.`)
-            }
+            onClick={() => setSearched(true)}
           >
-            Search
+            ⌕ Search
           </button>
-
           <button
             className="room-reset-button"
             onClick={resetFilters}
@@ -274,55 +288,46 @@ function RoomSearch() {
             Reset
           </button>
         </div>
-
       </section>
 
       <div className="room-results-heading">
         <h2>
-          {availableRooms.length} rooms available
+          {availableRooms.length}{' '}
+          {availableRooms.length === 1 ? 'room' : 'rooms'} available
         </h2>
-        <span>
-          {day} at {time} · 1-hour time slot
-        </span>
+        <span>{day} at {time} · 1-hour slot</span>
       </div>
 
-      {availableRooms.length > 0 ? (
+      {searched && availableRooms.length > 0 ? (
         <div className="room-results-list">
-
           {availableRooms.map((room) => (
-            <article
-              className="room-result-card"
-              key={room.id}
-            >
+            <article className="room-result-card" key={room.id}>
+              <div className="room-result-icon" aria-hidden="true">
+                ▦
+              </div>
+
               <div className="room-result-info">
                 <h3>
-                  {room.id}, {room.building}
+                  {room.name}, {room.building}
                 </h3>
-
                 <p>
-                  {room.features.join(', ')}
+                  {room.capacity} seats · {room.features.join(', ')}
                 </p>
-
                 <span className="room-type-label">
                   {room.type}
                 </span>
               </div>
 
               <span className="room-availability">
-                {getFreeUntil(room.id)}
+                {nextBooking(room.id)}
               </span>
             </article>
           ))}
-
         </div>
       ) : (
         <div className="room-empty-state">
-          <h3>No available rooms found</h3>
-          <p>
-            Try changing the building, capacity,
-            room type or selected time.
-          </p>
-
+          <strong>No rooms match these filters.</strong>
+          <p>Try another building, room type or time slot.</p>
           <button
             className="room-reset-button"
             onClick={resetFilters}
@@ -330,9 +335,6 @@ function RoomSearch() {
             Clear filters
           </button>
         </div>
-      )}
-      {searchMessage && (
-        <p className="room-search-note">{searchMessage}</p>
       )}
 
     </div>
