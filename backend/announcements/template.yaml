@@ -1,0 +1,67 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Smart Campus - Announcements back end (API Gateway + Lambda + DynamoDB)
+
+Parameters:
+  AllowedOrigin:
+    Type: String
+    Default: '*'
+    Description: Front-end origin allowed by CORS (e.g. the Amplify URL). '*' while testing.
+
+Resources:
+  AnnouncementsTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: Announcements
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+      KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+      SSESpecification:
+        SSEEnabled: true
+
+  AnnouncementsApi:
+    Type: AWS::Serverless::HttpApi
+    Properties:
+      CorsConfiguration:
+        AllowOrigins:
+          - !Ref AllowedOrigin
+        AllowMethods: [GET, POST, OPTIONS]
+        AllowHeaders: [Content-Type, Authorization]
+
+  AnnouncementsFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: smart-campus-announcements
+      Runtime: nodejs20.x
+      Handler: handler.handler
+      CodeUri: src/
+      MemorySize: 128
+      Timeout: 10
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref AnnouncementsTable
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref AnnouncementsTable
+      Events:
+        ListAnnouncements:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref AnnouncementsApi
+            Path: /announcements
+            Method: GET
+        CreateAnnouncement:
+          Type: HttpApi
+          Properties:
+            ApiId: !Ref AnnouncementsApi
+            Path: /announcements
+            Method: POST
+
+Outputs:
+  AnnouncementsApiUrl:
+    Description: Put this in frontend/.env.local as VITE_ANNOUNCEMENTS_API_URL
+    Value: !Sub 'https://${AnnouncementsApi}.execute-api.${AWS::Region}.amazonaws.com'
